@@ -23,6 +23,12 @@ jobs:
           $tagsArray = $tags -split "`n"
           # Get the second latest tag
           $prevTag = if ($tagsArray.Length -ge 2) { $tagsArray[1].Trim() } else { "" }
+
+          if (-not $prevTag) {
+            # No previous tag found, fallback to the last commit hash
+            $prevTag = git log -1 --pretty=format:"%H"
+          }
+
           # Write previous tag to environment file
           Write-Host "Previous tag: $prevTag"
           echo "PREV_TAG=$prevTag" >> $env:GITHUB_ENV
@@ -68,7 +74,7 @@ jobs:
           asset_name: mytotp.rc.ps1
           asset_content_type: text/plain
 
-      - name: Upload .rc Bash script 
+      - name: Upload Bash script
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -76,16 +82,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./mytotp.rc
           asset_name: mytotp.rc
-          asset_content_type: text/plain
-
-      - name: Upload standalone Bash script 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./mytotp.sh
-          asset_name: mytotp.sh
           asset_content_type: text/plain
 
       - name: Upload README.md
