@@ -1,18 +1,47 @@
 # mytotp.rc
 
+[![Release](https://github.com/uyriq/mytotp_as_bashfuncs/actions/workflows/release.yml/badge.svg)](https://github.com/uyriq/mytotp_as_bashfuncs/actions/workflows/release.yml)
+![Bash](https://img.shields.io/badge/shell-bash-blue.svg)
+![PowerShell](https://img.shields.io/badge/shell-powershell-blue.svg)
+![macOS](https://img.shields.io/badge/os-macOS-green.svg)
+![Linux](https://img.shields.io/badge/os-linux-green.svg)
+![Windows](https://img.shields.io/badge/os-windows-green.svg)
+
 TOTP 2FA without smartphone
 
 Simple replacement of TOTP Authenticator mobile app for POSIX console (using `oathtool`).
 
-Now in two versions: plain BASH script and BASH functions for sourcing.
+Now in different versions: plain BASH script and BASH functions for sourcing.
+Also the powershell core (pwsh) version for sourcing and use as cmdlets the same way
 
 This readme file is about `mytotp.rc` version, if you want `mytotp.sh` then skip to [main README.md](./README.md)
 
 ## Prerequisits
 
-POSIX-compliant console, with BASH, GNU utils, GNU Privacy Guard and `oathtool` available. The latest script version require MacOS bash be upgraded to modern version. see bellow for details. If you dont want to upgrade standard MacOS bash, then use previos ugly script version from [releases here](https://github.com/uyriq/mytotp_as_bashfuncs/releases/tag/0.0.1.rc)
+POSIX-compliant console, with BASH or PWSH, GNU utils, GNU Privacy Guard and `oathtool` available. The latest script version require MacOS bash be upgraded to modern version. see bellow for details. If you dont want to upgrade standard MacOS bash, then use previos ugly script version from [releases here](https://github.com/uyriq/mytotp_as_bashfuncs/releases/tag/0.0.1.rc)
 for latest scipt then we need xclip (optional, for Linux only) or pbpaste (it is included in MacOS by default)
 Note, that installed `brew` is required for MacOS, if you want to install modern bash. after `brew install bash` make symlink `sudo ln -s /opt/homebrew/bin/bash /usr/local/bin/bash` then you do not need to `chsh` your shell from zsh to bash, it is more convinient to use subshell with call of `/usr/local/bin/bash` and keep zsh as default
+Another way is to use with pwsh (MS Powershell core)
+
+Once Homebrew is installed, open your terminal and run the following command to install PowerShell Core:
+
+`brew install --cask powershell`
+
+Create a symbolic link: After installing PowerShell Core, create a symbolic link to make it easier to run pwsh from the terminal:
+
+`sudo ln -s /usr/local/bin/pwsh /usr/local/bin/pwsh`
+
+Add PowerShell Core to the list of valid login shells: To allow PowerShell Core to be used as a login shell, add it to the list of valid shells:
+
+`sudo bash -c 'echo /usr/local/bin/pwsh >> /etc/shells'`
+
+Source mytotp.rc in PowerShell Core: To use the mytotp.rc functions in PowerShell Core, source the mytotp.rc file in your PowerShell profile. Open your PowerShell profile file (e.g., ~/.config/powershell/Microsoft.PowerShell_profile.ps1) and add the following line:
+
+`. $HOME/mytotp.rc.ps1`
+
+This will load the mytotp.rc functions whenever you start a new PowerShell Core session.
+
+By following these steps, you will have PowerShell Core installed and configured on your macOS system, and you will be able to use the mytotp.rc functions in PowerShell Core.
 
 ## Instalation
 
@@ -48,3 +77,7 @@ To use these commands, follow these steps:
 3. **Generate a TOTP with `mytotp SERVID`**: This command generates a Time-based One-Time Password (TOTP) for the specified service ID (SERVID). The output is a standard 6-digit TOTP code, which may not be compatible with other TOTP formats (e.g., Yandex TOTP). If no service ID is provided, the command will print usage help and version information. The `mytotp` function is identical to the standalone `mytotp.sh` script. For more information, see the [main README.md](./README.md).
 
 To get a TOTP code for a service, run `mytotp.sh SERVID`, unlock your GPG key with the passphrase, then wait for the 6-digit code. The script will wait for the next 30-second interval before generating the code, giving you a maximum of 30 seconds to use it.
+
+4. **Delete an existing TOTP with `mytotpdel SERVID`**: This command delete gpg file, so remove SERVID.
+
+after typing `mytotp ` or `mytotpdel ` press <kbd>space</kbd> and twice <kbd>tab</kbd> key to see autocompletion that list your existing SERVIDs (gpg filese in key folder)

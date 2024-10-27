@@ -61,7 +61,7 @@ function mytotp() {
   fi
 
   if [ -z "$1" ]; then
-    echo "mytotp version 1.0.0.rc"
+    echo "mytotp version 1.0.1.rc"
     echo "Usage: mytotp SERVID"
     echo "SERVID is a service ID, abbreviated, that you provided for mytotpadd before, check all with mytotplist command"
     return 1
@@ -130,6 +130,20 @@ function mytotpadd() {
   esac
 }
 
+function mytotpdel() {
+  SERVID=$1
+  if [ -z "$1" ]; then
+    echo -e "Usage: $0 SERVID\n\tSERVID is a service ID, abbreviated, w/o ext:"
+    return 1
+  fi
+  if [ -f "${KEYDIR}/${SERVID}${KEYEXT}" ]; then
+    rm -f "${KEYDIR}/${SERVID}${KEYEXT}"
+    echo "Key for ${SERVID} deleted."
+  else
+    echo "No key for ${SERVID}"
+  fi
+}
+
 # function to list all SERVIDs in ~/.config/mytotp
 function mytotplist() {
   if [ ! -d "${KEYDIR}" ]; then
@@ -149,3 +163,24 @@ function mytotplist() {
     echo "$ENTRIES"
   fi
 }
+
+# Function to get the list of .gpg files in $KEYDIR
+get_gpg_files() {
+  find "$KEYDIR" -name "*$KEYEXT" -type f 2>/dev/null | sed -e "s|$KEYDIR/||" -e "s|$KEYEXT||"
+}
+
+# Register argument completer for mytotpdel function
+_mytotpdel_completions() {
+  local cur_word="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=( $(compgen -W "$(get_gpg_files)" -- "$cur_word") )
+}
+
+# Register argument completer for mytotp function
+_mytotp_completions() {
+  local cur_word="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=( $(compgen -W "$(get_gpg_files)" -- "$cur_word") )
+}
+
+# Register the completion functions
+complete -F _mytotpdel_completions mytotpdel
+complete -F _mytotp_completions mytotp

@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          # Get all tags sorted by creation date in reverse order
+          $tags = git tag --sort=-creatordate
+          # Convert the tags to an array
+          $tagsArray = $tags -split "`n"
+          # Get the second latest tag
+          $prevTag = if ($tagsArray.Length -ge 2) { $tagsArray[1].Trim() } else { "" }
+          # Write previous tag to environment file
+          Write-Host "Previous tag: $prevTag"
+          echo "PREV_TAG=$prevTag" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Create release notes
+        id: create_release_notes
+        run: |
+          echo "## Release Notes" > release_notes.md
+          echo "" >> release_notes.md
+          echo "### Changes in this release:" >> release_notes.md
+          echo "" >> release_notes.md
+          $PREV_TAG = $env:PREV_TAG
+          Write-Host "Previous tag: $PREV_TAG"
+          if ([string]::IsNullOrEmpty($PREV_TAG)) {
+            Write-Host "No previous tag found. Exiting."
+            exit 1
+          }
+          git log --oneline $PREV_TAG..HEAD >> release_notes.md
+          echo "" >> release_notes.md
+
+        shell: pwsh
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body_path: ./release_notes.md
+          draft: false
+          prerelease: false
+
+      - name: Upload PowerShell script
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mytotp.rc.ps1
+          asset_name: mytotp.rc.ps1
+          asset_content_type: text/plain
+
+      - name: Upload .rc Bash script 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mytotp.rc
+          asset_name: mytotp.rc
+          asset_content_type: text/plain
+
+      - name: Upload standalone Bash script 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mytotp.sh
+          asset_name: mytotp.sh
+          asset_content_type: text/plain
+
+      - name: Upload README.md
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mytotp.rc.README.md
+          asset_name: README.md
+          asset_content_type: text/markdown
