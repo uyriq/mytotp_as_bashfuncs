@@ -34,6 +34,8 @@ jobs:
         run: |
           echo "## Release Notes" > release_notes.md
           echo "" >> release_notes.md
+          Get-Content "./latest_release_notes.md" >> release_notes.md
+          echo "" >> release_notes.md
           echo "### Changes in this release:" >> release_notes.md
           echo "" >> release_notes.md
           $PREV_TAG = $env:PREV_TAG
