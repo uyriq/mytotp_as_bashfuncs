@@ -24,7 +24,7 @@ jobs:
         run: |
           $tags = git tag --sort=-creatordate
           $tagsArray = $tags -split "`n"
-          $prevTag = if ($tagsArray.Length -ge 2) { $tagsArray[1].Trim() } else { "'v1.2.0'" }
+          $prevTag = if ($tagsArray.Length -ge 2) { $tagsArray[1].Trim() } else { "" }
           Write-Host "Previous tag: $prevTag"
           echo "PREV_TAG=$prevTag" >> $env:GITHUB_ENV
 
@@ -50,7 +50,7 @@ jobs:
         id: extract_tag_name
         shell: pwsh
         run: |
-          $tagName = "${GITHUB_REF#refs/tags/}"
+          $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
           Write-Host "Tag name: $tagName"
           echo "TAG_NAME=$tagName" >> $env:GITHUB_ENV
 
