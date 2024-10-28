@@ -50,7 +50,11 @@ jobs:
         id: extract_tag_name
         shell: pwsh
         run: |
-          $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
+          if ($env:GITHUB_REF -match 'refs/tags/(.*)') {
+            $tagName = $matches[1]
+          } else {
+            $tagName = git describe --tags $(git rev-list --tags --max-count=1)
+          }
           Write-Host "Tag name: $tagName"
           echo "TAG_NAME=$tagName" >> $env:GITHUB_ENV
 
