@@ -29,7 +29,7 @@ jobs:
 
           if (-not $prevTag) {
             # will do stub 
-            $prevTag = "0.0.1.rc" 
+            $prevTag = "v1.2.0" 
           }
 
           # Write previous tag to environment file
